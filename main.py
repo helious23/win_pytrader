@@ -2,17 +2,28 @@ import win32com.client
 
 PATH = "C:\\Users\\max16\\Desktop\\Stocks\\pytrader"
 
-instMarketEye = win32com.client.Dispatch("CpSysDib.MarketEye")
+instStockChart = win32com.client.Dispatch("CpSysDib.StockChart")
 instStockCode = win32com.client.Dispatch("CpUtil.CpStockCode")
 code = instStockCode.NameToCode("테크윙")
 
-instMarketEye.SetInputValue(0, (4, 67, 70, 111)) # 현재가, PER, EPS, 최근분기년월
-instMarketEye.SetInputValue(1, code)
+instStockChart.SetInputValue(0, code)
+instStockChart.SetInputValue(1, ord('2')) # 갯수로 요청
+instStockChart.SetInputValue(4, 60) # 60일치
+instStockChart.SetInputValue(5, 8) # 거래량
+instStockChart.SetInputValue(6, ord("D")) # 일봉
+instStockChart.SetInputValue(9, ord("1"))
 
-instMarketEye.BlockRequest()
+instStockChart.BlockRequest()
 
+volumes= []
+num_data = instStockChart.GetHeaderValue(3)
+for i in range(num_data):
+    volume = instStockChart.GetDataValue(0, i)
+    volumes.append(volume)
 
-print(f"현재가: {instMarketEye.GetDataValue(0, 0)}")
-print(f"PER: {instMarketEye.GetDataValue(1, 0)}")
-print(f"EPS: {instMarketEye.GetDataValue(2, 0)}")
-print(f"최근분기년월: {instMarketEye.GetDataValue(3, 0)}")
+average_volume = (sum(volumes) - volumes[0]) / (len(volumes) -1)
+
+if(volumes[0] > average_volume *10):
+    print("대박 주")
+else:
+    print("일반 주", volumes[0] / average_volume)
