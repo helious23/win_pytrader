@@ -2,22 +2,28 @@ import win32com.client
 
 PATH = "C:\\Users\\max16\\Desktop\\Stocks\\pytrader"
 
-instCpCybos = win32com.client.Dispatch("CpUtil.CpCodeMgr")
-excel = win32com.client.Dispatch("Excel.Application")
-excel.Visible = True
-wb = excel.Workbooks.Add()
-ws = wb.Worksheets("Sheet1")
+instStockChart = win32com.client.Dispatch("CpSysDib.StockChart")
 
-code_list = instCpCybos.GetStockListByMarket(1)
+instStockChart.SetInputValue(0, "A089030") # 종목코드
+instStockChart.SetInputValue(1, ord("1")) # 1: 기간, 2: 갯수
+instStockChart.SetInputValue(2, 20240313) # 종료일
+instStockChart.SetInputValue(3, 20230314) # 시작일
+# instStockChart.SetInputValue(4, 10) # 요청 개수
+instStockChart.SetInputValue(5, (0, 2, 3, 4, 5, 8)) # 필드
+instStockChart.SetInputValue(6, ord("D")) # 차트 구분 D:일
+instStockChart.SetInputValue(9, ord("1"))
 
-for i, code in enumerate(code_list):
-    second_code = instCpCybos.GetStockSectionKind(code)
-    name = instCpCybos.CodeToName(code)
-    ws.Range(f"A{i + 1}").Value = i + 1
-    ws.Range(f"B{i + 1}").Value = code
-    ws.Range(f"C{i + 1}").Value = second_code
-    ws.Range(f"D{i + 1}").Value = name
+instStockChart.BlockRequest()
 
-wb.SaveAs(f"{PATH}\\kospi.xlsx")
-excel.Quit()
-    
+num_data = instStockChart.GetHeaderValue(3)
+
+# SetInputValue(5, xxx) 에서 요청한 필드의 수
+num_field = instStockChart.GetHeaderValue(1)
+
+print(num_data)
+print(num_field)
+print("일자", "시가", "고가", "저가", "종가", "거래량")
+for i in range(num_data):
+    for j in range(num_field):
+        print(instStockChart.GetDataValue(j, i), end=" ")
+    print("")
