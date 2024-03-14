@@ -1,22 +1,24 @@
 import win32com.client
+import pythoncom
 
-instCpCodeMgr = win32com.client.Dispatch("CpUtil.CpCodeMgr")
-instMarketEye = win32com.client.Dispatch("CpSysDib.MarketEye")
+class XASessionEventHandler:
+    login_state = 0
 
-target_code_list = instCpCodeMgr.GetGroupCodeList(5)
+    def OnLogin(self, code, msg):
+        if code == "0000":
+            print("로그인 성공")
+            XASessionEventHandler.login_state = 1
 
-# Get PER
-instMarketEye.SetInputValue(0, 67)
-instMarketEye.SetInputValue(1, target_code_list)
+        else:
+            print("로그인 실패")
+instXASession = win32com.client.DispatchWithEvents("XA_Session.XASession", XASessionEventHandler)
 
-# BlockRequest
-instMarketEye.BlockRequest()
+id = "xx"
+passwd = "xx"
+cert_passwd = "xxxx"
 
-#GetHeaderValue
-num_stock = instMarketEye.GetHeaderValue(2)
+instXASession.ConnectServer("demo.ebestsec.co.kr", 20001)
+instXASession.Login(id, passwd, cert_passwd, 0, 0)
 
-sum_per = 0
-for i in range(num_stock):
-    sum_per += instMarketEye.GetDataValue(0, i)
-
-print(f"Average PER: {sum_per / num_stock}")
+while XASessionEventHandler.login_state == 0:
+    pythoncom.PumpWaitingMessages()
