@@ -37,6 +37,8 @@ for i in range(num_account):
     account = instXASession.GetAccountList(i)
     print(f"계좌번호: {account}")
 
+RES_PATH = "C:\\eBest\\xingAPI\\Res"
+
 # class 생성
 class XAQueryEventHandlerT1102:
     query_state = 0
@@ -48,7 +50,7 @@ class XAQueryEventHandlerT1102:
 instXAQueryT1102 = win32com.client.DispatchWithEvents("XA_DataSet.XAQuery",XAQueryEventHandlerT1102)
 
 # t1102 등록
-instXAQueryT1102.ResFileName = "C:\\eBest\\xingAPI\\Res\\t1102.res"
+instXAQueryT1102.ResFileName = f"{RES_PATH}\\t1102.res"
 
 # t1102 입력 데이터 설정
 instXAQueryT1102.SetFieldData("t1102InBlock", "shcode", 0, "000250") # SetFieldData("블록명", "필드명", 단일데이터=0), "입력값"
@@ -62,3 +64,29 @@ while XAQueryEventHandlerT1102.query_state == 0:
 name = instXAQueryT1102.GetFieldData("t1102OutBlock", "hname", 0) # hname: 한글종목명
 price = instXAQueryT1102.GetFieldData("t1102OutBlock", "price", 0) # price: 현재가
 print(f"종목명: {name}\n현재가: {price}")
+
+class XAQueryEventHandlerT8430:
+    query_state = 0
+
+    def OnReceiveData(self, code):
+        XAQueryEventHandlerT8430.query_state = 1
+
+instXaQueryT8430 = win32com.client.DispatchWithEvents("XA_DataSet.XAQuery", XAQueryEventHandlerT8430)
+instXaQueryT8430.ResFileName = f"{RES_PATH}\\t8430.res"
+
+instXaQueryT8430.SetFieldData("t8430InBlock", "gubun", 0, 2)
+instXaQueryT8430.Request(0)
+
+while XAQueryEventHandlerT8430.query_state == 0:
+    pythoncom.PumpWaitingMessages()
+
+T8430_OUT_BLOCK = "t8430OutBlock"
+
+count = instXaQueryT8430.GetBlockCount(T8430_OUT_BLOCK)
+
+for i in range(5):
+    hname = instXaQueryT8430.GetFieldData(T8430_OUT_BLOCK, "hname", i)
+    shcode = instXaQueryT8430.GetFieldData(T8430_OUT_BLOCK, "shcode", i)
+    expcode = instXaQueryT8430.GetFieldData(T8430_OUT_BLOCK, "expcode", i)
+    etfgubun = instXaQueryT8430.GetFieldData(T8430_OUT_BLOCK, "etfgubun", i)
+    print(i, hname, shcode, expcode, etfgubun)
