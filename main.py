@@ -12,12 +12,14 @@ class MyWindow(QMainWindow):
         self.kiwoom = QAxWidget("KHOPENAPI.KHOpenAPICtrl.1")
         self.kiwoom.dynamicCall("CommConnect()")
         
+        # TextEdit 생성
         self.text_edit = QTextEdit(self)
         self.text_edit.setGeometry(10, 60, 280, 80)
-        self.text_edit.setEnabled(False)
+        self.text_edit.setEnabled(False) # 입력기능 X
         
+        # event 와 event 처리 메서드 연결
         self.kiwoom.OnEventConnect.connect(self.event_connect)
-        
+    
     def event_connect(self, err_code):
         if err_code == 0:
             self.text_edit.append("로그인 성공😁")
