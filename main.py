@@ -1,5 +1,9 @@
+import os
 import win32com.client
 import pythoncom
+from dotenv import load_dotenv
+
+load_dotenv()
 
 class XASessionEventHandler:
     login_state = 0
@@ -13,12 +17,17 @@ class XASessionEventHandler:
             print("로그인 실패")
 instXASession = win32com.client.DispatchWithEvents("XA_Session.XASession", XASessionEventHandler)
 
-id = "xx"
-passwd = "xx"
-cert_passwd = "xxxx"
+id = os.getenv("ID")
+passwd = os.getenv("PASSWD")
+cert_passwd = os.getenv("CERT_PASSWD")
 
 instXASession.ConnectServer("demo.ebestsec.co.kr", 20001)
 instXASession.Login(id, passwd, cert_passwd, 0, 0)
 
 while XASessionEventHandler.login_state == 0:
     pythoncom.PumpWaitingMessages()
+
+num_account = instXASession.GetAccountListCount()
+for i in range(num_account):
+    account = instXASession.GetAccountList(i)
+    print(account)
