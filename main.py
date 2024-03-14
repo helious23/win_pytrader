@@ -90,3 +90,37 @@ for i in range(5):
     expcode = instXaQueryT8430.GetFieldData(T8430_OUT_BLOCK, "expcode", i)
     etfgubun = instXaQueryT8430.GetFieldData(T8430_OUT_BLOCK, "etfgubun", i)
     print(i, hname, shcode, expcode, etfgubun)
+
+
+class XAQueryEventHandlerT8410:
+    query_state = 0
+
+    def OnReceiveData(self, code):
+        XAQueryEventHandlerT8410.query_state = 1
+
+instXaQueryT8410 = win32com.client.DispatchWithEvents("XA_DataSet.XAQuery", XAQueryEventHandlerT8410)
+instXaQueryT8410.ResFileName = f"{RES_PATH}\\t8410.res"
+
+T8410_IN_BLOCK = "t8410InBlock"
+T8410_OUT_BLOCK = "t8410OutBlock1"
+
+instXaQueryT8410.SetFieldData(T8410_IN_BLOCK, "shcode", 0, "000250")
+instXaQueryT8410.SetFieldData(T8410_IN_BLOCK, "gubun", 0,"2")
+instXaQueryT8410.SetFieldData(T8410_IN_BLOCK, "sdate", 0, "20240301")
+instXaQueryT8410.SetFieldData(T8410_IN_BLOCK, "edate", 0, "20240314")
+instXaQueryT8410.SetFieldData(T8410_IN_BLOCK, "comp_yn", 0, "N")
+
+instXaQueryT8410.Request(0)
+
+while XAQueryEventHandlerT8410.query_state == 0:
+    pythoncom.PumpWaitingMessages()
+
+count = instXaQueryT8410.GetBlockCount(T8410_OUT_BLOCK)
+ 
+for i in range(count):
+    date = instXaQueryT8410.GetFieldData(T8410_OUT_BLOCK, "date", i)
+    open = instXaQueryT8410.GetFieldData(T8410_OUT_BLOCK, "open", i)
+    high = instXaQueryT8410.GetFieldData(T8410_OUT_BLOCK, "high", i)
+    low = instXaQueryT8410.GetFieldData(T8410_OUT_BLOCK, "low", i)
+    close = instXaQueryT8410.GetFieldData(T8410_OUT_BLOCK, "close", i)
+    print(date, open, high, low, close)
