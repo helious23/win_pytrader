@@ -12,29 +12,30 @@ class MyWindow(QMainWindow):
         self.kiwoom.dynamicCall("CommConnect()")
         
         # OpenAPI + Event
-        self.kiwoom.OnEventConnect.connect(self.event_connect)
+        # self.kiwoom.OnEventConnect.connect(self.event_connect)
         # self.kiwoom.OnReceiveTrData.connect(self.receive_trdata)
         
         self.setWindowTitle("👋Hello Stock")
-        self.setGeometry(300, 300, 300, 150)
+        self.setGeometry(300, 300, 500, 450)
         
-        btn1 = QPushButton("계좌 조회", self)
-        btn1.move(190, 20)
+        btn1 = QPushButton("종목 얻기", self)
+        btn1.move(400, 10)
         btn1.clicked.connect(self.btn1_clicked)
         
-        self.text_edit = QTextEdit(self)
-        self.text_edit.setGeometry(10, 60, 280, 80)
+        self.listWidget = QListWidget(self)
+        self.listWidget.setGeometry(10, 10, 300, 200)
         
-    
     def btn1_clicked(self):
-        account_num = self.kiwoom.dynamicCall("GetLoginInfo(QString)", ["ACCNO"]).rstrip(";")
-        self.text_edit.append(f"계좌번호: {account_num}")
+        ret = self.kiwoom.dynamicCall("GetCodeListByMarket(QString)", ["0"])
+        kospi_code_list = ret.split(";")
+        kospi_code_name_list = []
         
-    def event_connect(self, err_code):
-        if err_code == 0:
-            self.text_edit.append("로그인 성공😍")
+        for x in kospi_code_list:
+            name = self.kiwoom.dynamicCall("GetMasterCodeName(QString)", [x])
+            kospi_code_name_list.append(f"{x} : {name}")
         
-                
+        self.listWidget.addItems(kospi_code_name_list)
+          
             
 if __name__ == "__main__":
     app = QApplication(sys.argv)
